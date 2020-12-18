@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "gl_generator",
+    "gl4_6_core",
+	"lgl",
+]

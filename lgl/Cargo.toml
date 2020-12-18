@@ -1,0 +1,11 @@
+[package]
+name = "lgl"
+version = "0.1.0"
+authors = ["dasetwas <dasetwas@dasetwas.dasetwas>", "g0r3"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+glutin = "0.26.0"
+gl4_6_core = {path = "../gl4_6_core"}
