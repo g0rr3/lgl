@@ -1,0 +1,18 @@
+[package]
+name = "gl4_6_core"
+version = "0.1.0"
+build = "build.rs"
+authors = ["dasetwas"]
+edition = "2018"
+description = "OpenGL bindings for OpenGL 4.6 core"
+
+[lib]
+name = "gl"
+path = "src/lib.rs"
+
+[build-dependencies]
+gl_generator = { path = "../gl_generator" }
+
+[features]
+default = []
+fn_calls_print = []
