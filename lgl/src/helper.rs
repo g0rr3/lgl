@@ -12,6 +12,5 @@ pub fn apply_shaders(shader: Vec<u32>) -> u32 {
     let program = gl::CreateProgram();
     shader.iter().for_each(|&s| gl::AttachShader(program, s));
     gl::LinkProgram(program);
-    gl::UseProgram(program);
     program
 }
