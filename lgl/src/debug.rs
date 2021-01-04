@@ -36,7 +36,6 @@ pub unsafe fn enable_gl_debug(log_level: GLErrorSeverityLogLevel) {
     gl::GetIntegerv(gl::CONTEXT_FLAGS);
 
     if context_flags as u32 & gl::CONTEXT_FLAG_DEBUG_BIT == 0 {
-        eprintln!("This is a non-debug OpenGL context which may not produce any debug output.");
         gl::Enable(gl::DEBUG_OUTPUT);
     }
 }

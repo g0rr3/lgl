@@ -1,24 +1,27 @@
-use std::mem::size_of;
+use std::{mem::size_of, thread::sleep_ms};
 
 use gl::{
-    self, types::GLsizeiptr, AttachShader, BindBuffer, BindVertexArray, BufferData, Clear,
-    ClearColor, CompileShader, CreateProgram, CreateShader, DrawArrays, EnableVertexAttribArray,
-    GenBuffers, GenVertexArrays, GetAttribLocation, LinkProgram, ShaderSource, UseProgram,
-    VertexAttribPointer, FRAGMENT_SHADER, VERTEX_SHADER,
+    self, BindBuffer, BindVertexArray, BufferData, ClearColor, DrawArrays, EnableVertexAttribArray,
+    GenBuffers, GenVertexArrays, GetUniformLocation, TexImage2D, Uniform4f, VertexAttribPointer,
 };
 use glutin::event::{Event, WindowEvent};
+use rand::prelude::*;
 
 mod debug;
+mod helper;
+mod tester;
 
-static VERTEX_DATA: [f32; 15] = [
-    -0.5, -0.5, 1.0, 0.0, 0.0, 0.0, 0.5, 0.0, 1.0, 0.0, 0.5, -0.5, 0.0, 0.0, 1.0,
+#[rustfmt::skip]
+static VERTEX_DATA: &[f32] = &[
+    0.0,  0.5, 0.0,
+    0.5, -0.5, 0.0,
+   -0.5, -0.5, 0.0,  
 ];
 
-fn main() {
-    let vs_src: Vec<&str> = vec![include_str!("shader/test.vertexshader")];
-    let fs_src: Vec<&str> = vec![include_str!("shader/test.fragmentshader")];
-    let _car_color: i32 = 0;
+const VS_SRC: &str = include_str!("shader/test.vert");
+const FS_SRC: &str = include_str!("shader/test.frag");
 
+fn main() {
     let el = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new().with_title("Men");
     let w_context = glutin::ContextBuilder::new()
@@ -28,62 +31,39 @@ fn main() {
 
     gl::load_with(|ptr| w_context.get_proc_address(ptr) as *const _);
     unsafe { debug::enable_gl_debug(debug::GLErrorSeverityLogLevel::DEBUG_SEVERITY_HIGH) };
+    let vs = helper::setup_shader(VS_SRC, gl::VERTEX_SHADER);
+    let fs = helper::setup_shader(FS_SRC, gl::FRAGMENT_SHADER);
 
-    let a: Vec<i32> = vs_src.iter().map(|x| x.len() as i32).collect();
-    let b: Vec<i32> = fs_src.iter().map(|x| x.len() as i32).collect();
+    let mut rng = rand::thread_rng();
 
-    let vs = CreateShader(VERTEX_SHADER);
-    ShaderSource(vs, 1, vs_src, &a[..]);
-    CompileShader(vs);
+    let program = helper::apply_shaders(vec![fs, vs]);
+    let my_color = GetUniformLocation(program, "myColor");
 
-    let fs = CreateShader(FRAGMENT_SHADER);
-    ShaderSource(fs, 1, fs_src, &b[..]);
-    CompileShader(fs);
-
-    let program = CreateProgram();
-    AttachShader(program, vs);
-    AttachShader(program, fs);
-    LinkProgram(program);
-    UseProgram(program);
+    let va = GenVertexArrays(1);
+    BindVertexArray(va);
 
     let vb = GenBuffers(1);
     BindBuffer(gl::ARRAY_BUFFER, vb);
     BufferData(
         gl::ARRAY_BUFFER,
-        (VERTEX_DATA.len() * size_of::<f32>()) as GLsizeiptr,
+        (VERTEX_DATA.len() * size_of::<f32>()) as isize,
         VERTEX_DATA.as_ptr() as *const _,
         gl::STATIC_DRAW,
     );
 
-    let va = GenVertexArrays(1);
-    BindVertexArray(va);
-
-    let pos_attrib = GetAttribLocation(program, "position");
-    let color_attrib = GetAttribLocation(program, "color");
-
     VertexAttribPointer(
-        pos_attrib as u32,
-        2,
-        gl::FLOAT,
         0,
-        5 * size_of::<f32>() as i32,
-        std::ptr::null(),
-    );
-
-    VertexAttribPointer(
-        color_attrib as u32,
         3,
         gl::FLOAT,
         0,
-        5 * std::mem::size_of::<f32>() as i32,
-        (2 * std::mem::size_of::<f32>()) as *const () as *const _,
+        3 * size_of::<f32>() as i32,
+        std::ptr::null(),
     );
 
-    EnableVertexAttribArray(pos_attrib as u32);
-    EnableVertexAttribArray(color_attrib as u32);
+    EnableVertexAttribArray(0);
 
     el.run(move |event, _, control_flow| {
-        *control_flow = glutin::event_loop::ControlFlow::Wait;
+        *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         match event {
             Event::LoopDestroyed => return,
@@ -94,12 +74,18 @@ fn main() {
                 }
                 _ => (),
             },
-            Event::RedrawRequested(_) => {
-                ClearColor(0.2, 0.3, 0.3, 1.0);
-                Clear(gl::COLOR_BUFFER_BIT);
+            Event::MainEventsCleared => {
+                ClearColor(0.0, 0.0, 0.0, 0.0);
+                let red: f32 = rng.gen_range(0.0..=1.0);
+                let blue: f32 = rng.gen_range(0.0..=1.0);
+                let green: f32 = rng.gen_range(0.0..=1.0);
+
+                Uniform4f(my_color, red, green, blue, 1.0);
+
                 DrawArrays(gl::TRIANGLES, 0, 3);
 
                 w_context.swap_buffers().unwrap();
+                sleep_ms(300);
             }
             _ => (),
         }

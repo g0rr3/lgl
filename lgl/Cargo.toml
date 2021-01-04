@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 glutin = "0.26.0"
 gl4_6_core = {path = "../gl4_6_core"}
+rand = "0.8.0"
+image = "0.23.12"
