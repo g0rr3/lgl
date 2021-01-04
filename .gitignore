@@ -1,2 +1,4 @@
 /target
 /gl4_6_core/src
+lgl/src/tester.rs
+gl4_6_core/build.rs

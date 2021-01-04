@@ -1,12 +1,11 @@
-use std::{mem::size_of, thread::sleep_ms};
+use std::mem::size_of;
 
 use gl::{
-    self, BindBuffer, BindTexture, BindVertexArray, BufferData, ClearColor, DrawArrays,
-    EnableVertexAttribArray, GenBuffers, GenTextures, GenVertexArrays, GenerateMipmap,
-    GetUniformLocation, PixelStorei, TexImage2D, TexParameteri, Uniform4f, VertexAttribPointer,
+    self, BindBuffer, BindTexture, BindVertexArray, BufferData, DrawArrays,
+    EnableVertexAttribArray, GenBuffers, GenTextures, GenVertexArrays, GenerateMipmap, PixelStorei,
+    TexImage2D, TexParameteri, VertexAttribPointer,
 };
 use glutin::event::{Event, WindowEvent};
-use rand::prelude::*;
 
 mod debug;
 mod helper;
@@ -19,13 +18,6 @@ static VERTICES: &[f32] = &[
      0.5, -0.5, 0.0,   0.0, 1.0, 0.0,   1.0, 0.0,   // bottom right
     -0.5, -0.5, 0.0,   0.0, 0.0, 1.0,   0.0, 0.0,   // bottom left
     -0.5,  0.5, 0.0,   1.0, 1.0, 0.0,   0.0, 1.0    // top left 
-];
-
-#[rustfmt::skip]
-static _TEX_COORDS: &[f32] = &[
-    0.0, 0.0,
-    1.0, 0.0,
-    0.5, 1.0 
 ];
 
 const VS_SRC: &str = include_str!("shader/test.vert");
